@@ -21,6 +21,10 @@ export function rewriteHTML(html: string) {
 export function rewriteScript(script: string) {
   let js = rewriteBareImport(script);
   js = JSON.stringify(js);
-  js = `console.log(eval(${js}))`;
+  js = `window.parent.postMessage({
+    method: "result",
+    data: [eval(${js})],
+})`;
+
   return /*js*/ `import('data:text/javascript,${encodeURIComponent(js)}').catch(console.error)`;
 }

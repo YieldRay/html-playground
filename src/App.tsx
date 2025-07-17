@@ -9,6 +9,7 @@ import { DownloadIcon } from "lucide-react";
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
 import { downloadFile } from "./utils/utils";
 import { Editor } from "./Editor";
+type Message = ReturnType<typeof Decode>;
 
 export function App() {
   const [htmlCode, setHtmlCode] = useState(/* html */ `<!DOCTYPE html>
@@ -27,8 +28,10 @@ export function App() {
 </script>
 </html>`);
   const rewrittenCode = useMemo(() => rewriteHTML(htmlCode), [htmlCode]);
-  const [consoleMessages, setConsoleMessages] = useState<any[]>([]);
+  const [consoleMessages, setConsoleMessages] = useState<Message[]>([]);
   const [showConsole, setShowConsole] = useState(true);
+  const commandHistoryRef = useRef<string[]>([]);
+  const commandHistoryIndexRef = useRef(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const clearConsole = () => {
@@ -63,7 +66,21 @@ export function App() {
     const handleMessage = (event: MessageEvent) => {
       // check if the message is from the iframe
       if (event.source !== iframeRef.current?.contentWindow) return;
-      setConsoleMessages((prev) => [...prev, Decode(event.data)]);
+
+      if (Array.isArray(event.data) && event.data.length > 0) {
+        setConsoleMessages((prev) => [...prev, Decode(event.data)]);
+      } else {
+        // Logic here must sync with `rewriteScript`
+        const { method, data } = event.data as { method: Message["method"]; data: any };
+        setConsoleMessages((prev) => [
+          ...prev,
+          {
+            method,
+            data,
+            timestamp: "",
+          },
+        ]);
+      }
     };
 
     window.addEventListener("message", handleMessage);
@@ -113,12 +130,14 @@ export function App() {
               <>
                 <ResizableHandle withHandle />
                 <ResizablePanel defaultSize={25}>
-                  <div className="flex flex-col h-full">
+                  <div className="flex flex-col h-full font-mono">
                     <div className="flex-1 overflow-auto">
                       <Console
-                        logs={consoleMessages}
+                        logs={consoleMessages as any[]}
                         // variant="dark"
-                        styles={{}}
+                        styles={{
+                          fontFamily: "monospace",
+                        }}
                       />
                     </div>
                     <div className="p-[2px]">
@@ -127,8 +146,41 @@ export function App() {
                         onKeyDown={(e) => {
                           if (e.key === "Enter" && !e.shiftKey) {
                             const textarea = e.target as HTMLTextAreaElement;
-                            evalConsole(textarea.value);
+                            const command = textarea.value.trim();
+                            if (command) {
+                              commandHistoryRef.current.push(command);
+                              commandHistoryIndexRef.current = commandHistoryRef.current.length;
+                              setConsoleMessages((prev) => [
+                                ...prev,
+                                {
+                                  method: "command",
+                                  data: [command],
+                                  timestamp: "",
+                                },
+                              ]);
+                              evalConsole(command);
+                            }
                             textarea.value = "";
+                          }
+
+                          if (e.key === "ArrowUp") {
+                            e.preventDefault();
+                            if (commandHistoryRef.current.length === 0) return;
+                            if (commandHistoryIndexRef.current > 0) {
+                              commandHistoryIndexRef.current--;
+                            }
+                            const command = commandHistoryRef.current[commandHistoryIndexRef.current];
+                            (e.target as HTMLInputElement).value = command || "";
+                          }
+
+                          if (e.key === "ArrowDown") {
+                            e.preventDefault();
+                            if (commandHistoryRef.current.length === 0) return;
+                            if (commandHistoryIndexRef.current < commandHistoryRef.current.length) {
+                              commandHistoryIndexRef.current++;
+                            }
+                            const command = commandHistoryRef.current[commandHistoryIndexRef.current];
+                            (e.target as HTMLInputElement).value = command || "";
                           }
                         }}
                       />
