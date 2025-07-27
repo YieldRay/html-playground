@@ -2,13 +2,13 @@ import "./index.css";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Console, Decode } from "console-feed";
-import { Button } from "./components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Input } from "@/components/ui/input";
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, BanIcon, PanelBottomOpenIcon, PanelBottomCloseIcon } from "lucide-react";
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
 import { downloadFile } from "./utils/utils";
 import { Editor } from "./Editor";
+import { InputWithHistory } from "./InputWithHistory";
 type Message = ReturnType<typeof Decode>;
 
 export function App() {
@@ -30,8 +30,6 @@ export function App() {
   const rewrittenCode = useMemo(() => rewriteHTML(htmlCode), [htmlCode]);
   const [consoleMessages, setConsoleMessages] = useState<Message[]>([]);
   const [showConsole, setShowConsole] = useState(true);
-  const commandHistoryRef = useRef<string[]>([]);
-  const commandHistoryIndexRef = useRef(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const clearConsole = () => {
@@ -103,15 +101,11 @@ export function App() {
       <header className="flex items-center justify-between border-b p-1">
         <h1 className="text-xl font-bold">HTML Playground</h1>
         <div className="flex gap-2">
+          <Button variant="secondary" size="icon" className="size-8" onClick={() => setShowConsole(!showConsole)}>
+            {showConsole ? <PanelBottomCloseIcon /> : <PanelBottomOpenIcon />}
+          </Button>
           <Button variant="secondary" size="icon" className="size-8" onClick={downloadCode}>
             <DownloadIcon />
-          </Button>
-
-          <Button size="sm" onClick={clearConsole}>
-            Clear Console
-          </Button>
-          <Button size="sm" onClick={() => setShowConsole(!showConsole)}>
-            {showConsole ? "Hide Console" : "Show Console"}
           </Button>
         </div>
       </header>
@@ -126,6 +120,21 @@ export function App() {
             <ResizablePanel defaultSize={75} minSize={25}>
               <iframe ref={iframeRef} className="w-full h-full" title="Preview" />
             </ResizablePanel>
+            <div className="flex items-center justify-between border-b px-1 py-0.5 bg-muted/30 min-h-[20px]">
+              <span className="text-[10px] text-muted-foreground">Console</span>
+              <div className="flex gap-0.5">
+                <Button variant="ghost" size="sm" className="h-4 w-4 p-0" onClick={clearConsole}>
+                  <BanIcon className="h-2.5 w-2.5" />
+                </Button>
+                <Button variant="ghost" size="sm" className="h-4 w-4 p-0" onClick={() => setShowConsole(!showConsole)}>
+                  {showConsole ? (
+                    <PanelBottomCloseIcon className="h-2.5 w-2.5" />
+                  ) : (
+                    <PanelBottomOpenIcon className="h-2.5 w-2.5" />
+                  )}
+                </Button>
+              </div>
+            </div>
             {showConsole && (
               <>
                 <ResizableHandle withHandle />
@@ -140,50 +149,25 @@ export function App() {
                         }}
                       />
                     </div>
-                    <div className="p-[2px]">
-                      <Input
-                        className="p-1 h-6 rounded-sm focus-visible:ring-[1px]"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter" && !e.shiftKey) {
-                            const textarea = e.target as HTMLTextAreaElement;
-                            const command = textarea.value.trim();
-                            if (command) {
-                              commandHistoryRef.current.push(command);
-                              commandHistoryIndexRef.current = commandHistoryRef.current.length;
-                              setConsoleMessages((prev) => [
-                                ...prev,
-                                {
-                                  method: "command",
-                                  data: [command],
-                                  timestamp: "",
-                                },
-                              ]);
-                              evalConsole(command);
-                            }
-                            textarea.value = "";
-                          }
-
-                          if (e.key === "ArrowUp") {
-                            e.preventDefault();
-                            if (commandHistoryRef.current.length === 0) return;
-                            if (commandHistoryIndexRef.current > 0) {
-                              commandHistoryIndexRef.current--;
-                            }
-                            const command = commandHistoryRef.current[commandHistoryIndexRef.current];
-                            (e.target as HTMLInputElement).value = command || "";
-                          }
-
-                          if (e.key === "ArrowDown") {
-                            e.preventDefault();
-                            if (commandHistoryRef.current.length === 0) return;
-                            if (commandHistoryIndexRef.current < commandHistoryRef.current.length) {
-                              commandHistoryIndexRef.current++;
-                            }
-                            const command = commandHistoryRef.current[commandHistoryIndexRef.current];
-                            (e.target as HTMLInputElement).value = command || "";
-                          }
-                        }}
-                      />
+                    <div className="border-t bg-background px-1 py-0.5">
+                      <div className="flex items-center gap-1 text-xs">
+                        <span className="text-blue-500 font-mono select-none ml-2 mr-3">&gt;</span>
+                        <InputWithHistory
+                          className="flex-1 bg-transparent border-none p-0 font-mono text-xs focus-visible:ring-0 focus-visible:outline-none min-h-[16px]"
+                          placeholder="Console JavaScript here"
+                          onCommand={(command) => {
+                            setConsoleMessages((prev) => [
+                              ...prev,
+                              {
+                                method: "command",
+                                data: [command],
+                                timestamp: "",
+                              },
+                            ]);
+                            evalConsole(command);
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
                 </ResizablePanel>
