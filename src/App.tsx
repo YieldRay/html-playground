@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Decode } from "console-feed";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   DownloadIcon,
@@ -14,11 +15,13 @@ import {
   PlayIcon,
   BugPlayIcon,
   ExternalLinkIcon,
+  Link2Icon,
 } from "lucide-react";
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
 import { downloadFile, utoa, copy } from "./utils/utils";
 import { Editor } from "./Editor";
 import { ConsolePanel } from "./ConsolePanel";
+import { URLShorten } from "./URLShorten";
 
 type Message = ReturnType<typeof Decode>;
 
@@ -27,6 +30,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const rewrittenCode = useMemo(() => rewriteHTML(htmlCode), [htmlCode]);
   const [consoleMessages, setConsoleMessages] = useState<Message[]>([]);
   const [showConsole, setShowConsole] = useState(true);
+  const [showUrlShorten, setShowUrlShorten] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const clearConsole = () => {
@@ -170,6 +174,27 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
           >
             <Share2Icon className="h-3.5 w-3.5" />
           </Button>
+
+          <Dialog open={showUrlShorten} onOpenChange={setShowUrlShorten}>
+            <DialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-muted/80 transition-colors"
+                title="Shorten URL"
+              >
+                <Link2Icon className="h-3.5 w-3.5" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>URL Shortener</DialogTitle>
+              </DialogHeader>
+              <URLShorten 
+                url={`${window.location.origin}${window.location.pathname}#${utoa(rewrittenCode)}`} 
+              />
+            </DialogContent>
+          </Dialog>
 
           <Button
             variant="ghost"
