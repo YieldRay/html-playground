@@ -9,20 +9,58 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Toaster } from "@/components/ui/sonner";
 import { App } from "./App";
+import { rewriteHTML } from "./utils/rewriteHTML";
+import { atou } from "./utils/utils";
 
-const elem = document.getElementById("root")!;
-const app = (
-  <StrictMode>
-    <App />
-    <Toaster position="top-center" />
-  </StrictMode>
-);
+let initialHTML = /* html */ `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  <button onclick="showConfetti()">Click me!</button>
+</body>
+<script type="module">
+  import confetti from "canvas-confetti@1.6.0"
+  globalThis.showConfetti = () => { confetti(); console.log("Confetti!"); }
+</script>
+</html>`;
 
-if (import.meta.hot) {
-  // With hot module reloading, `import.meta.hot.data` is persisted.
-  const root = (import.meta.hot.data.root ??= createRoot(elem));
-  root.render(app);
-} else {
-  // The hot module reloading API is not available in production.
-  createRoot(elem).render(app);
+try {
+  const hash = window.location.hash.slice(1);
+  if (hash.startsWith("~")) {
+    const html = atou(hash.slice(1));
+    document.open();
+    document.write(rewriteHTML(html));
+    document.close();
+    // DO NOT render()
+  } else if (hash) {
+    initialHTML = atou(hash);
+    render();
+  } else {
+    render();
+  }
+} catch {
+  render();
+}
+
+function render() {
+  const elem = document.getElementById("root")!;
+  const app = (
+    <StrictMode>
+      <App initialHTML={initialHTML} />
+      <Toaster position="top-center" />
+    </StrictMode>
+  );
+
+  if (import.meta.hot) {
+    // With hot module reloading, `import.meta.hot.data` is persisted.
+    const root = (import.meta.hot.data.root ??= createRoot(elem));
+    root.render(app);
+  } else {
+    // The hot module reloading API is not available in production.
+    createRoot(elem).render(app);
+  }
 }

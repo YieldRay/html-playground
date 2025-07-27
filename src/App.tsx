@@ -13,39 +13,16 @@ import {
   Share2Icon,
   PlayIcon,
   BugPlayIcon,
+  ExternalLinkIcon,
 } from "lucide-react";
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
-import { downloadFile, atou, utoa, copy } from "./utils/utils";
+import { downloadFile, utoa, copy } from "./utils/utils";
 import { Editor } from "./Editor";
 import { ConsolePanel } from "./ConsolePanel";
+
 type Message = ReturnType<typeof Decode>;
 
-let initialHTML = /* html */ `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-  <button onclick="showConfetti()">Click me!</button>
-</body>
-<script type="module">
-  import confetti from "canvas-confetti@1.6.0"
-  globalThis.showConfetti = () => { confetti(); console.log("Confetti!"); }
-</script>
-</html>`;
-
-try {
-  const hash = window.location.hash.slice(1);
-  if (hash) {
-    initialHTML = atou(hash);
-  }
-} catch {
-  location.hash = "";
-}
-
-export function App() {
+export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const [htmlCode, setHtmlCode] = useState(initialHTML);
   const rewrittenCode = useMemo(() => rewriteHTML(htmlCode), [htmlCode]);
   const [consoleMessages, setConsoleMessages] = useState<Message[]>([]);
@@ -129,6 +106,11 @@ export function App() {
     toast.success("Link copied to clipboard!");
   };
 
+  const open = () => {
+    const hash = window.location.hash.slice(1);
+    window.open(`${window.location.origin}${window.location.pathname}#~${hash}`, "_blank");
+  };
+
   const runEruda = async () => {
     const iframeDoc = getIframeDoc();
     if (!iframeDoc) return;
@@ -163,6 +145,16 @@ export function App() {
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0 hover:bg-muted/80 transition-colors"
+            onClick={runEruda}
+            title="Run Eruda"
+          >
+            <BugPlayIcon className="h-3.5 w-3.5" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 w-6 p-0 hover:bg-muted/80 transition-colors"
             onClick={downloadCode}
             title="Download HTML"
           >
@@ -183,10 +175,10 @@ export function App() {
             variant="ghost"
             size="sm"
             className="h-6 w-6 p-0 hover:bg-muted/80 transition-colors"
-            onClick={runEruda}
-            title="Run Eruda"
+            onClick={open}
+            title="Open in New Tab"
           >
-            <BugPlayIcon className="h-3.5 w-3.5" />
+            <ExternalLinkIcon className="h-3.5 w-3.5" />
           </Button>
 
           <div className="w-px h-3.5 bg-border mx-0.5"></div>
