@@ -2,9 +2,6 @@ import "./index.css";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Decode } from "console-feed";
-import { Button } from "@/components/ui/button";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   DownloadIcon,
@@ -17,8 +14,14 @@ import {
   ExternalLinkIcon,
   Link2Icon,
 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
-import { downloadFile, utoa, copy } from "./utils/utils";
+import { downloadFile, copy, debounce } from "./utils/utils";
+import { useEncodedState } from "./hooks/useEncodedState";
 import { Editor } from "./Editor";
 import { ConsolePanel } from "./ConsolePanel";
 import { URLShorten } from "./URLShorten";
@@ -26,16 +29,21 @@ import { URLShorten } from "./URLShorten";
 type Message = ReturnType<typeof Decode>;
 
 export function App({ initialHTML = "" }: { initialHTML?: string }) {
-  const [htmlCode, setHtmlCode] = useState(initialHTML);
+  // State management
+  const [htmlCode, setHtmlCode, encodedHash] = useEncodedState(initialHTML);
   const rewrittenCode = useMemo(() => rewriteHTML(htmlCode), [htmlCode]);
   const [consoleMessages, setConsoleMessages] = useState<Message[]>([]);
   const [showConsole, setShowConsole] = useState(true);
   const [showUrlShorten, setShowUrlShorten] = useState(false);
+
+  // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  const clearConsole = () => {
-    setConsoleMessages([]);
-  };
+  // Memoized values and callbacks
+  const debouncedSetHtmlCode = useMemo(() => debounce((value: string) => setHtmlCode(value), 500), [setHtmlCode]);
+
+  // Utility functions
+  const clearConsole = () => setConsoleMessages([]);
 
   const getIframeDoc = () => {
     if (!iframeRef.current) return null;
@@ -44,6 +52,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
     return iframeDoc;
   };
 
+  // Core functionality
   const runCode = () => {
     const iframeDoc = getIframeDoc();
     if (!iframeDoc) return;
@@ -63,6 +72,31 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
     iframeDoc.defaultView?.eval(rewriteScript(js));
   };
 
+  // Action handlers
+  const downloadCode = () => downloadFile("index.html", rewrittenCode, "text/html");
+
+  const shareCode = () => {
+    copy(`${window.location.origin}${window.location.pathname}#${encodedHash}`);
+    toast.success("Link copied to clipboard!");
+  };
+
+  const open = () => {
+    window.open(`${window.location.origin}${window.location.pathname}#~${encodedHash}`, "_blank");
+  };
+
+  const runEruda = async () => {
+    const iframeDoc = getIframeDoc();
+    if (!iframeDoc) return;
+
+    await iframeDoc.defaultView?.eval(/*js*/ `pkg2head("eruda").then(() => {
+      eruda.init();
+      eruda.show();
+    })`);
+
+    setShowConsole(false);
+  };
+
+  // Effects
   // Listen for console messages from iframe
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -89,43 +123,10 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
-  // Auto-run code when it changes (with debounce)
+  // Auto-run code when rewrittenCode changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      runCode();
-      // Set location hash to encoded HTML
-      const encoded = utoa(htmlCode);
-      window.location.hash = encoded;
-    }, 500);
-
-    return () => clearTimeout(timer);
-  }, [htmlCode]);
-
-  const downloadCode = () => downloadFile("index.html", rewrittenCode, "text/html");
-
-  const shareCode = () => {
-    const encoded = utoa(rewrittenCode);
-    const url = `${window.location.origin}${window.location.pathname}#${encoded}`;
-    copy(url);
-    toast.success("Link copied to clipboard!");
-  };
-
-  const open = () => {
-    const hash = window.location.hash.slice(1);
-    window.open(`${window.location.origin}${window.location.pathname}#~${hash}`, "_blank");
-  };
-
-  const runEruda = async () => {
-    const iframeDoc = getIframeDoc();
-    if (!iframeDoc) return;
-
-    await iframeDoc.defaultView?.eval(/*js*/ `pkg2head("eruda").then(() => {
-      eruda.init();
-      eruda.show();
-    })`);
-
-    setShowConsole(false);
-  };
+    runCode();
+  }, [rewrittenCode]);
 
   return (
     <div className="h-full flex flex-col">
@@ -190,9 +191,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
               <DialogHeader>
                 <DialogTitle>URL Shortener</DialogTitle>
               </DialogHeader>
-              <URLShorten 
-                url={`${window.location.origin}${window.location.pathname}#${utoa(rewrittenCode)}`} 
-              />
+              <URLShorten url={`${window.location.origin}${window.location.pathname}#${encodedHash}`} />
             </DialogContent>
           </Dialog>
 
@@ -223,7 +222,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={50}>
-          <Editor value={htmlCode} onUpdate={(value) => setHtmlCode(value)} className="w-full h-full overflow-auto" />
+          <Editor value={htmlCode} onUpdate={debouncedSetHtmlCode} className="w-full h-full overflow-auto" />
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={50}>
