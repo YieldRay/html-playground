@@ -7,12 +7,14 @@
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Toaster } from "@/components/ui/sonner";
 import { App } from "./App";
 
 const elem = document.getElementById("root")!;
 const app = (
   <StrictMode>
     <App />
+    <Toaster position="top-center" />
   </StrictMode>
 );
 

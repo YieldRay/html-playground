@@ -155,3 +155,7 @@ body,
   scrollbar-width: thin;
   scrollbar-color: #ccc transparent;
 }
+
+button {
+  cursor: pointer;
+}

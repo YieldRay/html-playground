@@ -1,4 +1,5 @@
 import * as ts from "typescript";
+import { CDN_ORIGIN } from "./constants";
 
 function isBareSpecifier(specifier: string) {
   // check if is relative or absolute path
@@ -73,13 +74,13 @@ function createRewriteTransformer(ESM_CDN: string): ts.TransformerFactory<ts.Sou
   };
 }
 
-export function rewriteBareImport(code: string, ESM_CDN = "https://esm.sh"): string {
+export function rewriteBareImport(code: string): string {
   try {
     // Parse the code
     const sourceFile = ts.createSourceFile("temp.ts", code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
 
     // Transform the AST
-    const transformer = createRewriteTransformer(ESM_CDN);
+    const transformer = createRewriteTransformer(CDN_ORIGIN);
     const result = ts.transform(sourceFile, [transformer]);
 
     // Generate the code
