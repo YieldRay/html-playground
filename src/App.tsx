@@ -1,14 +1,14 @@
 import "./index.css";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { Console, Decode } from "console-feed";
+import { Decode } from "console-feed";
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { DownloadIcon, BanIcon, PanelBottomOpenIcon, PanelBottomCloseIcon } from "lucide-react";
+import { DownloadIcon, BanIcon, PanelTopOpenIcon, PanelTopCloseIcon } from "lucide-react";
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
 import { downloadFile } from "./utils/utils";
 import { Editor } from "./Editor";
-import { InputWithHistory } from "./InputWithHistory";
+import { ConsolePanel } from "./ConsolePanel";
 type Message = ReturnType<typeof Decode>;
 
 export function App() {
@@ -102,7 +102,7 @@ export function App() {
         <h1 className="text-xl font-bold">HTML Playground</h1>
         <div className="flex gap-2">
           <Button variant="secondary" size="icon" className="size-8" onClick={() => setShowConsole(!showConsole)}>
-            {showConsole ? <PanelBottomCloseIcon /> : <PanelBottomOpenIcon />}
+            {showConsole ? <PanelTopOpenIcon /> : <PanelTopCloseIcon />}
           </Button>
           <Button variant="secondary" size="icon" className="size-8" onClick={downloadCode}>
             <DownloadIcon />
@@ -128,9 +128,9 @@ export function App() {
                 </Button>
                 <Button variant="ghost" size="sm" className="h-4 w-4 p-0" onClick={() => setShowConsole(!showConsole)}>
                   {showConsole ? (
-                    <PanelBottomCloseIcon className="h-2.5 w-2.5" />
+                    <PanelTopOpenIcon className="h-2.5 w-2.5" />
                   ) : (
-                    <PanelBottomOpenIcon className="h-2.5 w-2.5" />
+                    <PanelTopCloseIcon className="h-2.5 w-2.5" />
                   )}
                 </Button>
               </div>
@@ -139,37 +139,20 @@ export function App() {
               <>
                 <ResizableHandle withHandle />
                 <ResizablePanel defaultSize={25}>
-                  <div className="flex flex-col h-full font-mono">
-                    <div className="flex-1 overflow-auto">
-                      <Console
-                        logs={consoleMessages as any[]}
-                        // variant="dark"
-                        styles={{
-                          fontFamily: "monospace",
-                        }}
-                      />
-                    </div>
-                    <div className="border-t bg-background px-1 py-0.5">
-                      <div className="flex items-center gap-1 text-xs">
-                        <span className="text-blue-500 font-mono select-none ml-2 mr-3">&gt;</span>
-                        <InputWithHistory
-                          className="flex-1 bg-transparent border-none p-0 font-mono text-xs focus-visible:ring-0 focus-visible:outline-none min-h-[16px]"
-                          placeholder="Console JavaScript here"
-                          onCommand={(command) => {
-                            setConsoleMessages((prev) => [
-                              ...prev,
-                              {
-                                method: "command",
-                                data: [command],
-                                timestamp: "",
-                              },
-                            ]);
-                            evalConsole(command);
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <ConsolePanel
+                    messages={consoleMessages}
+                    onCommand={(command) => {
+                      setConsoleMessages((prev) => [
+                        ...prev,
+                        {
+                          method: "command",
+                          data: [command],
+                          timestamp: "",
+                        },
+                      ]);
+                      evalConsole(command);
+                    }}
+                  />
                 </ResizablePanel>
               </>
             )}
