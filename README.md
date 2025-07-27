@@ -1,4 +1,4 @@
-# html-playground-demo
+# html-playground
 
 To install dependencies:
 
