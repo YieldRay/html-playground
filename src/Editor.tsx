@@ -1,8 +1,8 @@
+import { useEffect, useRef } from "react";
 import { basicEditor, type SetupOptions } from "prism-code-editor/setups";
 // Importing Prism grammars
 import "prism-code-editor/prism/languages/markup";
 
-import { useEffect, useRef } from "react";
 type PrismEditor = ReturnType<typeof basicEditor>;
 
 export function Editor({
