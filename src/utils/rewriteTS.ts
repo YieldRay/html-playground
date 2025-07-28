@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import ts from "typescript";
 import { CDN_ORIGIN } from "./constants";
 
 function isBareSpecifier(specifier: string) {

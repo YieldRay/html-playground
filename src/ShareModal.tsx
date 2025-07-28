@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { CopyIcon, CheckIcon, Share2Icon, Link2Icon, ExternalLinkIcon } from "lucide-react";
-import { copy } from "./utils/utils";
 import { toast } from "sonner";
+import { copy } from "./utils/utils";
 
 // Copy Button Component
 const CopyButton = ({ url, title, className = "", size = "sm" as const }) => {
@@ -24,7 +25,7 @@ const CopyButton = ({ url, title, className = "", size = "sm" as const }) => {
       size={size}
       onClick={handleCopy}
       title={copyStatus === "copied" ? "Copied!" : title}
-      className={`flex items-center gap-1.5 ${className}`}
+      className={cn(`flex items-center gap-1.5`, className)}
     >
       {copyStatus === "copied" ? <CheckIcon className="h-3 w-3 text-green-600" /> : <CopyIcon className="h-3 w-3" />}
       <span className="text-xs">{copyStatus === "copied" ? "Copied!" : "Copy"}</span>
