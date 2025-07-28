@@ -2,7 +2,6 @@ import "./index.css";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Decode } from "console-feed";
-import { toast } from "sonner";
 import {
   DownloadIcon,
   BanIcon,
@@ -12,19 +11,17 @@ import {
   PlayIcon,
   BugPlayIcon,
   ExternalLinkIcon,
-  Link2Icon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader } from "@/components/ui/dialog";
 
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
-import { downloadFile, copy, debounce } from "./utils/utils";
+import { downloadFile, debounce } from "./utils/utils";
 import { useEncodedState } from "./hooks/useEncodedState";
 import { Editor } from "./Editor";
 import { ConsolePanel } from "./ConsolePanel";
-import { URLShorten } from "./URLShorten";
+import { ShareModal } from "./ShareModal";
 
 type Message = ReturnType<typeof Decode>;
 
@@ -34,7 +31,6 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const rewrittenCode = useMemo(() => rewriteHTML(htmlCode), [htmlCode]);
   const [consoleMessages, setConsoleMessages] = useState<Message[]>([]);
   const [showConsole, setShowConsole] = useState(true);
-  const [showUrlShorten, setShowUrlShorten] = useState(false);
 
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -74,11 +70,6 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
 
   // Action handlers
   const downloadCode = () => downloadFile("index.html", rewrittenCode, "text/html");
-
-  const shareCode = () => {
-    copy(`${window.location.origin}${window.location.pathname}#${encodedHash}`);
-    toast.success("Link copied to clipboard!");
-  };
 
   const open = () => {
     window.open(`${window.location.origin}${window.location.pathname}#~${encodedHash}`, "_blank");
@@ -166,34 +157,16 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
             <DownloadIcon className="h-3.5 w-3.5" />
           </Button>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-6 w-6 p-0 hover:bg-muted/80 transition-colors"
-            onClick={shareCode}
-            title="Share Code"
-          >
-            <Share2Icon className="h-3.5 w-3.5" />
-          </Button>
-
-          <Dialog open={showUrlShorten} onOpenChange={setShowUrlShorten}>
-            <DialogTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 w-6 p-0 hover:bg-muted/80 transition-colors"
-                title="Shorten URL"
-              >
-                <Link2Icon className="h-3.5 w-3.5" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>URL Shortener</DialogTitle>
-              </DialogHeader>
-              <URLShorten url={`${window.location.origin}${window.location.pathname}#${encodedHash}`} />
-            </DialogContent>
-          </Dialog>
+          <ShareModal encodedHash={encodedHash}>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0 hover:bg-muted/80 transition-colors"
+              title="Share Code"
+            >
+              <Share2Icon className="h-3.5 w-3.5" />
+            </Button>
+          </ShareModal>
 
           <Button
             variant="ghost"
