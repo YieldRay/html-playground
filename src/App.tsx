@@ -11,6 +11,7 @@ import {
   PlayIcon,
   BugPlayIcon,
   ExternalLinkIcon,
+  LoaderIcon,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const rewrittenCode = useMemo(() => rewriteHTML(htmlCode), [htmlCode]);
   const [consoleMessages, setConsoleMessages] = useState<Message[]>([]);
   const [showConsole, setShowConsole] = useState(true);
+  const [erudaLoading, setErudaLoading] = useState(false);
 
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -79,12 +81,17 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
     const iframeDoc = getIframeDoc();
     if (!iframeDoc) return;
 
-    await iframeDoc.defaultView?.eval(/*js*/ `pkg2head("eruda").then(() => {
-      eruda.init();
-      eruda.show();
-    })`);
-
-    setShowConsole(false);
+    try {
+      setErudaLoading(true);
+      await iframeDoc.defaultView?.eval(/*js*/ `pkg2head("eruda").then(() => {
+        eruda.init();
+        eruda.show();
+      })`);
+      setShowConsole(false);
+    } catch {
+    } finally {
+      setErudaLoading(false);
+    }
   };
 
   // Effects
@@ -144,7 +151,11 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
             onClick={runEruda}
             title="Run Eruda"
           >
-            <BugPlayIcon className="h-3.5 w-3.5" />
+            {erudaLoading ? (
+              <LoaderIcon className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <BugPlayIcon className="h-3.5 w-3.5" />
+            )}
           </Button>
 
           <Button
