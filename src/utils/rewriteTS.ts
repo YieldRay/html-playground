@@ -94,7 +94,13 @@ export function rewriteBareImport(code: string): string {
     // Cleanup
     result.dispose();
 
-    return transformedCode;
+    // Transpile TSX
+    return ts.transpile(transformedCode, {
+      target: ts.ScriptTarget.Latest,
+      noCheck: true,
+      declaration: false,
+      jsx: ts.JsxEmit.React,
+    });
   } catch (error) {
     console.warn("Failed to parse code with TypeScript AST, returning original:", error);
     return code;
