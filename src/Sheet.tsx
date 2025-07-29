@@ -8,9 +8,8 @@ interface SheetProps {
   onOpenChange: (open: boolean) => void;
   children?: ReactNode;
   side?: "left" | "right" | "top" | "bottom";
-  size?: "sm" | "md" | "lg" | "xl" | "full";
+  className?: string;
   unmountOnClose?: boolean;
-  asChild?: boolean;
 }
 
 export function Sheet({
@@ -18,9 +17,8 @@ export function Sheet({
   onOpenChange,
   children,
   side = "right",
-  size = "md",
+  className,
   unmountOnClose = false,
-  asChild = false,
   ...props
 }: React.PropsWithChildren<SheetProps>) {
   // Handle escape key
@@ -42,42 +40,6 @@ export function Sheet({
       document.body.style.overflow = "unset";
     };
   }, [open, onOpenChange]);
-
-  const getSizeClasses = () => {
-    const isVertical = side === "top" || side === "bottom";
-
-    if (isVertical) {
-      switch (size) {
-        case "sm":
-          return "h-1/4";
-        case "md":
-          return "h-1/3";
-        case "lg":
-          return "h-1/2";
-        case "xl":
-          return "h-3/4";
-        case "full":
-          return "h-full";
-        default:
-          return "h-1/3";
-      }
-    } else {
-      switch (size) {
-        case "sm":
-          return "w-80";
-        case "md":
-          return "w-96";
-        case "lg":
-          return "w-[28rem]";
-        case "xl":
-          return "w-[36rem]";
-        case "full":
-          return "w-full";
-        default:
-          return "w-96";
-      }
-    }
-  };
 
   const getPositionClasses = () => {
     switch (side) {
@@ -128,10 +90,10 @@ export function Sheet({
       {/* Sheet */}
       <div
         className={cn(
-          "fixed z-50 bg-white shadow-xl transition-transform duration-300 ease-in-out",
+          "fixed z-50 bg-white shadow-xl transition-transform duration-300 ease-in-out max-w-full max-h-full",
           getPositionClasses(),
-          getSizeClasses(),
-          getTransformClasses()
+          getTransformClasses(),
+          className
         )}
       >
         {children}

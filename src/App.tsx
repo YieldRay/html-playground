@@ -16,12 +16,12 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Sheet } from "./Sheet";
 
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
 import { downloadFile, debounce } from "./utils/utils";
 import { useEncodedState } from "./hooks/useEncodedState";
 import { Editor } from "./Editor";
+import { Sheet } from "./Sheet";
 import { ConsolePanel } from "./ConsolePanel";
 import { ShareModal } from "./ShareModal";
 import { useWindowSizeType } from "./hooks/useMediaQuery";
@@ -281,7 +281,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
     return (
       <div className="h-full flex flex-col">
         {headerPart}
-        <Sheet open={sheetOpen} onOpenChange={setSheetOpen} size="lg">
+        <Sheet open={sheetOpen} onOpenChange={setSheetOpen} side="bottom" className="h-[calc(100vh-2rem)]">
           {previewAndConsolePart}
         </Sheet>
         {editorPart}

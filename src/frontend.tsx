@@ -23,7 +23,7 @@ let initialHTML = /* html */ `<!DOCTYPE html>
   <button onclick="showConfetti()">Click me!</button>
 </body>
 <script type="module">
-  import confetti from "canvas-confetti@1.6.0"
+  import confetti from "canvas-confetti";
   globalThis.showConfetti = () => { confetti(); console.log("Confetti!"); }
 </script>
 </html>`;
