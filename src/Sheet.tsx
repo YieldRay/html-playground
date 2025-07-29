@@ -19,7 +19,6 @@ export function Sheet({
   side = "right",
   className,
   unmountOnClose = false,
-  ...props
 }: React.PropsWithChildren<SheetProps>) {
   // Handle escape key
   useEffect(() => {

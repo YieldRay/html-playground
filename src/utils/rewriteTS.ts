@@ -17,6 +17,7 @@ function isBareSpecifier(specifier: string) {
 function createRewriteTransformer(ESM_CDN: string): ts.TransformerFactory<ts.SourceFile> {
   return (context: ts.TransformationContext) => {
     function rewriteSpecifier(specifier: string): string {
+      if (specifier.startsWith("npm:")) return specifier.replace(/^npm:/, ESM_CDN + "/");
       if (isBareSpecifier(specifier)) {
         return new URL(specifier, ESM_CDN).toString();
       }
@@ -77,7 +78,7 @@ function createRewriteTransformer(ESM_CDN: string): ts.TransformerFactory<ts.Sou
 export function rewriteBareImport(code: string): string {
   try {
     // Parse the code
-    const sourceFile = ts.createSourceFile("temp.ts", code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
+    const sourceFile = ts.createSourceFile("temp.tsx", code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 
     // Transform the AST
     const transformer = createRewriteTransformer(CDN_ORIGIN);
@@ -97,10 +98,19 @@ export function rewriteBareImport(code: string): string {
     // Transpile TSX
     return ts.transpile(transformedCode, {
       target: ts.ScriptTarget.Latest,
+      module: ts.ModuleKind.ESNext,
       noCheck: true,
       declaration: false,
       jsx: ts.JsxEmit.React,
     });
+    // .replaceAll(
+    //   `import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";`,
+    //   `import { jsx as _jsx, jsxs as _jsxs } from "https://esm.sh/react/jsx-runtime";`
+    // )
+    // .replaceAll(
+    //   `import { jsxDEV as _jsxDEV } from "react/jsx-dev-runtime";`,
+    //   `import { jsxDEV as _jsxDEV } from "https://esm.sh/react/jsx-dev-runtime";`
+    // );
   } catch (error) {
     console.warn("Failed to parse code with TypeScript AST, returning original:", error);
     return code;

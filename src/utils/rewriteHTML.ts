@@ -4,8 +4,8 @@ import { CDN_ORIGIN } from "./constants";
 export function rewriteHTML(html: string) {
   const domParser = new DOMParser();
   const doc = domParser.parseFromString(html, "text/html");
-  const scripts = doc.querySelectorAll("script");
-  for (const script of scripts) {
+
+  for (const script of doc.querySelectorAll("script")) {
     if (script.innerHTML) {
       const jsCode = script.innerHTML;
       const rewrittenCode = rewriteBareImport(jsCode);
@@ -175,4 +175,4 @@ window.import$ = import$;
  * await pkg2head("vue@3"); console.log(Vue);
  */
 window.pkg2head = pkg2head;
-`;
+`.trim();

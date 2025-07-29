@@ -61,6 +61,9 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
 
     clearConsole();
 
+    // DEBUG:
+    // console.log(rewrittenCode)
+
     // Write to iframe
     iframeDoc.open();
     iframeDoc.write(rewrittenCode);
