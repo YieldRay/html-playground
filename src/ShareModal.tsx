@@ -4,14 +4,13 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader } from 
 import { cn } from "@/lib/utils";
 import { CopyIcon, CheckIcon, Share2Icon, Link2Icon, ExternalLinkIcon } from "lucide-react";
 import { toast } from "sonner";
-import { copy } from "./utils/utils";
+import { copy } from "./utils/copy";
 
-// Copy Button Component
 const CopyButton = ({ url, title, className = "", size = "sm" as const }) => {
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied">("idle");
 
-  const handleCopy = () => {
-    copy(url);
+  const handleCopy = async () => {
+    await copy(url);
     toast.success("Link copied to clipboard!");
     setCopyStatus("copied");
     setTimeout(() => {
