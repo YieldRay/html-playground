@@ -8,6 +8,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme-provider"
 import { App } from "./App";
 import { rewriteHTML } from "./utils/rewriteHTML";
 import { atou } from "./utils/utils";
@@ -50,8 +51,10 @@ function render() {
   const elem = document.getElementById("root")!;
   const app = (
     <StrictMode>
-      <App initialHTML={initialHTML} />
-      <Toaster position="top-center" />
+      <ThemeProvider storageKey="ui-theme">
+        <App initialHTML={initialHTML} />
+        <Toaster position="top-center" />
+      </ThemeProvider>
     </StrictMode>
   );
 

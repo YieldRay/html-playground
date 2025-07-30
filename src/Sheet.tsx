@@ -89,7 +89,7 @@ export function Sheet({
       {/* Sheet */}
       <div
         className={cn(
-          "fixed z-50 bg-white shadow-xl transition-transform duration-300 ease-in-out max-w-full max-h-full",
+          "fixed z-50 bg-background shadow-xl transition-transform duration-300 ease-in-out max-w-full max-h-full",
           getPositionClasses(),
           getTransformClasses(),
           className

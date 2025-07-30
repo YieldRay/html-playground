@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Console, Decode } from "console-feed";
+import { useIsDarkTheme } from "@/components/theme-provider";
 import { InputWithHistory } from "./InputWithHistory";
 
 type Message = ReturnType<typeof Decode>;
@@ -11,6 +12,7 @@ interface ConsolePanelProps {
 
 export function ConsolePanel({ messages, onCommand }: ConsolePanelProps) {
   const consoleContainerRef = useRef<HTMLDivElement>(null);
+  const isDarkTheme = useIsDarkTheme()
 
   // Auto-scroll console to bottom when new messages arrive
   useEffect(() => {
@@ -25,7 +27,7 @@ export function ConsolePanel({ messages, onCommand }: ConsolePanelProps) {
       <div ref={consoleContainerRef} className="flex-1 overflow-auto">
         <Console
           logs={messages as any[]}
-          // variant="dark"
+          variant={isDarkTheme ? "dark" : undefined}
           styles={{
             fontFamily: "monospace",
           }}

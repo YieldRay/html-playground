@@ -16,6 +16,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { Separator } from "@/components/ui/separator"
+import { ModeToggle } from "@/components/mode-toggle"
 
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
 import { downloadFile, debounce } from "./utils/utils";
@@ -37,6 +39,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const [erudaLoading, setErudaLoading] = useState(false);
   const isCompact = useWindowSizeType() === "compact";
   const [sheetOpen, setSheetOpen] = useState(false);
+
 
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -138,7 +141,8 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const headerPart = (
     <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-2 py-1 min-h-[32px]">
       <div className="flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
+        <ModeToggle />
+        <Separator orientation="vertical" />
         <h1 className="text-sm font-semibold text-foreground/90">HTML Playground</h1>
       </div>
       <div className="flex items-center gap-0.5">
@@ -196,7 +200,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
           <ExternalLinkIcon className="h-3.5 w-3.5" />
         </Button>
 
-        <div className="w-px h-3.5 bg-border mx-0.5"></div>
+        <Separator orientation="vertical" />
 
         <Button
           variant="default"
@@ -238,7 +242,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
       <Button
         variant="ghost"
         size="sm"
-        className="h-4 w-4 p-0   hover:text-gray-400"
+        className="h-4 w-4 p-0 hover:text-gray-400"
         onClick={() => setShowConsole(!showConsole)}
         title={showConsole ? "Hide Console" : "Show Console"}
       >
