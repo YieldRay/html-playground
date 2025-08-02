@@ -28,13 +28,13 @@
     "prism-code-editor": "^4.1.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-hook-form": "^7.61.1",
-    "react-resizable-panels": "^3.0.3",
+    "react-hook-form": "^7.62.0",
+    "react-resizable-panels": "^3.0.4",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.2",
     "zod": "^3.25.76"
   },
   "devDependencies": {

@@ -16,8 +16,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { Separator } from "@/components/ui/separator"
-import { ModeToggle } from "@/components/mode-toggle"
+import { Separator } from "@/components/ui/separator";
+import { ModeToggle } from "@/components/mode-toggle";
 
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
 import { downloadFile, debounce } from "./utils/utils";
@@ -26,6 +26,7 @@ import { Editor } from "./Editor";
 import { Sheet } from "./Sheet";
 import { ConsolePanel } from "./ConsolePanel";
 import { ShareModal } from "./ShareModal";
+import { TemplatePicker } from "./TemplatePicker";
 import { useWindowSizeType } from "./hooks/useMediaQuery";
 
 type Message = ReturnType<typeof Decode>;
@@ -39,7 +40,6 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const [erudaLoading, setErudaLoading] = useState(false);
   const isCompact = useWindowSizeType() === "compact";
   const [sheetOpen, setSheetOpen] = useState(false);
-
 
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -141,7 +141,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const headerPart = (
     <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-2 py-1 min-h-[32px]">
       <div className="flex items-center gap-1.5">
-        <ModeToggle />
+        <TemplatePicker onSelectTemplate={setHtmlCode} />
         <Separator orientation="vertical" />
         <h1 className="text-sm font-semibold text-foreground/90">HTML Playground</h1>
       </div>
@@ -155,6 +155,8 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
         >
           {showConsole ? <PanelTopOpenIcon className="h-3.5 w-3.5" /> : <PanelTopCloseIcon className="h-3.5 w-3.5" />}
         </Button>
+
+        <ModeToggle />
 
         <Button
           variant="ghost"
