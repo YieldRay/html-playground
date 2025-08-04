@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { ModeToggle } from "@/components/mode-toggle";
 
 import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
+import { formatHTML } from "./utils/formatHTML";
 import { downloadFile, debounce } from "./utils/utils";
 import { useEncodedState } from "./hooks/useEncodedState";
 import { Editor } from "./Editor";
@@ -137,6 +138,20 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   useEffect(() => {
     runCode();
   }, [rewrittenCode]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.altKey && event.shiftKey && event.key === "F") {
+        event.preventDefault();
+        const formattedCode = formatHTML(htmlCode);
+        if (formattedCode !== htmlCode) {
+          setHtmlCode(formattedCode);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [htmlCode, setHtmlCode]);
 
   const headerPart = (
     <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-2 py-1 min-h-[32px]">
