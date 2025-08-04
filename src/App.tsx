@@ -222,7 +222,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   );
 
   const editorPart = (
-    <Editor value={htmlCode} onUpdate={debouncedSetHtmlCode} className="w-full h-full overflow-auto" />
+    <Editor value={htmlCode} onUpdate={debouncedSetHtmlCode} className="grid w-full h-full overflow-auto" />
   );
 
   const previewPart = <iframe ref={iframeRef} className="w-full h-full" title="Preview" />;

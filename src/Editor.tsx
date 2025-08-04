@@ -1,39 +1,49 @@
 import { useEffect, useRef } from "react";
 import { useIsDarkTheme } from "@/components/theme-provider";
+import type { PrismEditor } from "prism-code-editor";
+import type { EditorTheme } from "prism-code-editor/themes";
 import { basicEditor, type SetupOptions } from "prism-code-editor/setups";
+
 // Importing Prism grammars
 import "prism-code-editor/prism/languages/markup";
-
-type PrismEditor = ReturnType<typeof basicEditor>;
+import "prism-code-editor/prism/languages/jsx";
+import "prism-code-editor/prism/languages/css-extras";
 
 export function Editor({
   value = "",
   language = "html",
+  onUpdate,
   onLoad,
   className,
-  ...props
 }: Partial<SetupOptions> & {
   onLoad?: VoidFunction;
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<PrismEditor>(null);
-  const isDarkTheme = useIsDarkTheme()
-  const theme = isDarkTheme ? "github-dark" : "github-light"
+  const editorRef = useRef<
+    PrismEditor<{
+      theme: EditorTheme;
+    }>
+  >(null);
+  const isDarkTheme = useIsDarkTheme();
+  const theme = isDarkTheme ? "github-dark" : "github-light";
 
   useEffect(() => {
     const div = ref.current;
     if (!div) return;
-    editorRef.current = basicEditor(
+    const editor = basicEditor(
       div,
       {
         value,
         language,
         theme,
-        ...props,
+        onUpdate,
       },
       onLoad
     );
+
+    editorRef.current = editor;
+    return () => editor.remove();
   }, []);
 
   useEffect(() => {
