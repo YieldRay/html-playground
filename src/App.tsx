@@ -1,6 +1,6 @@
 import "./index.css";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Decode } from "console-feed";
 import {
   DownloadIcon,
@@ -12,7 +12,9 @@ import {
   BugPlayIcon,
   ExternalLinkIcon,
   LoaderIcon,
+  EraserIcon
 } from "lucide-react";
+import { tinykeys } from "tinykeys"
 
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -107,6 +109,13 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
     }
   };
 
+  const format = useCallback(() => {
+    const formattedCode = formatHTML(htmlCode);
+    if (formattedCode !== htmlCode) {
+      setHtmlCode(formattedCode);
+    }
+  }, [htmlCode])
+
   // Effects
   // Listen for console messages from iframe
   useEffect(() => {
@@ -140,18 +149,10 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   }, [rewrittenCode]);
 
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey && event.shiftKey && event.key === "F") {
-        event.preventDefault();
-        const formattedCode = formatHTML(htmlCode);
-        if (formattedCode !== htmlCode) {
-          setHtmlCode(formattedCode);
-        }
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [htmlCode, setHtmlCode]);
+    return tinykeys(window, {
+      "Alt+Shift+F": format
+    })
+  }, [format]);
 
   const headerPart = (
     <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-2 py-1 min-h-[32px]">
@@ -161,6 +162,16 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
         <h1 className="text-sm font-semibold text-foreground/90">HTML Playground</h1>
       </div>
       <div className="flex items-center gap-0.5">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 w-6 p-0 hover:bg-muted/80 transition-colors"
+          onClick={format}
+          title="format"
+        >
+          <EraserIcon className="h-3.5 w-3.5" />
+        </Button>
+
         <Button
           variant="ghost"
           size="sm"

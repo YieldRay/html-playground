@@ -1,8 +1,9 @@
 import ts from "typescript";
 
 export function formatTS(code: string, options: Partial<ts.FormatCodeSettings> = {}): string {
+  const FILE_NAME = "temp.tsx";
   try {
-    const sourceFile = ts.createSourceFile("temp.tsx", code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const sourceFile = ts.createSourceFile(FILE_NAME, code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
 
     const defaultFormatOptions: ts.FormatCodeSettings = {
       indentSize: 2,
@@ -27,7 +28,7 @@ export function formatTS(code: string, options: Partial<ts.FormatCodeSettings> =
 
     const compilerHost: ts.CompilerHost = {
       getSourceFile: (fileName) => {
-        if (fileName === "temp.tsx") return sourceFile;
+        if (fileName === FILE_NAME) return sourceFile;
         return undefined;
       },
       writeFile: () => {},
@@ -55,11 +56,11 @@ export function formatTS(code: string, options: Partial<ts.FormatCodeSettings> =
       getCompilationSettings: () => program.getCompilerOptions(),
       getNewLine: () => "\n",
       getProjectVersion: () => "1",
-      getScriptFileNames: () => ["temp.tsx"],
+      getScriptFileNames: () => [FILE_NAME],
       getScriptKind: () => ts.ScriptKind.TSX,
       getScriptVersion: () => "1",
       getScriptSnapshot: (fileName) => {
-        if (fileName === "temp.tsx") {
+        if (fileName === FILE_NAME) {
           return ts.ScriptSnapshot.fromString(code);
         }
         return undefined;
@@ -74,7 +75,7 @@ export function formatTS(code: string, options: Partial<ts.FormatCodeSettings> =
 
     const languageService = ts.createLanguageService(languageServiceHost);
 
-    const textChanges = languageService.getFormattingEditsForDocument("temp.tsx", formatOptions);
+    const textChanges = languageService.getFormattingEditsForDocument(FILE_NAME, formatOptions);
 
     let formattedCode = code;
 

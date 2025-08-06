@@ -8,7 +8,7 @@ export const HTML_TEMPLATES: Template[] = [
     {
         name: "Basic HTML",
         description: "Source code of example.net",
-        code: `<!doctype html>
+        code: `<!DOCTYPE html>
 <html>
 <head>
     <title>Example Domain</title>
@@ -56,7 +56,7 @@ export const HTML_TEMPLATES: Template[] = [
 </html>`
     },
     {
-        name: "React",
+        name: "RadixUI",
         description: "React19 with RadixUI",
         code: `<!DOCTYPE html>
 <html lang="en">
