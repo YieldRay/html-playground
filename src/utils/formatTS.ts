@@ -1,9 +1,9 @@
 import ts from "typescript";
+import { FILE_NAME, createSourceFile } from "./typescript";
 
 export function formatTS(code: string, options: Partial<ts.FormatCodeSettings> = {}): string {
-  const FILE_NAME = "temp.tsx";
   try {
-    const sourceFile = ts.createSourceFile(FILE_NAME, code, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+    const sourceFile = createSourceFile(code);
 
     const defaultFormatOptions: ts.FormatCodeSettings = {
       indentSize: 2,
@@ -43,7 +43,7 @@ export function formatTS(code: string, options: Partial<ts.FormatCodeSettings> =
     };
 
     const program = ts.createProgram(
-      ["temp.tsx"],
+      [FILE_NAME],
       {
         target: ts.ScriptTarget.Latest,
         module: ts.ModuleKind.ESNext,
