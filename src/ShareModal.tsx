@@ -155,7 +155,7 @@ export function ShareModal({ encodedHash, children }: ShareModalProps) {
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">Shortened URL:</label>
                 <div className="flex gap-2">
-                  <CopyButton url={shortened} title="Copy shortened URL" />
+                  <CopyButton url={shortened} title="Copy shortened URL" className="h-7" />
                   <Button
                     variant="outline"
                     size="sm"
