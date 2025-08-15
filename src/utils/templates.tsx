@@ -153,7 +153,7 @@ createApp(Demo).mount('#app')
     <div id="root"></div>
   
   <script type="module">
-import React, { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { createRoot } from "react-dom/client";
 
 const GRAVITY = 0.5
