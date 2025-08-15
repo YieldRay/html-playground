@@ -160,3 +160,25 @@ body,
 button {
   cursor: pointer;
 }
+
+/* improve for console-feed */
+.css-dnj0yz {
+  .css-ex0crf {
+    color: #fff;
+  }
+
+  .css-1dqtzrx {
+    details > summary ~ span {
+      color: #997675;
+    }
+
+    .linkified {
+      color: #6d96bc;
+      text-decoration: underline;
+
+      &:hover {
+        background-color: #42424210;
+      }
+    }
+  }
+}

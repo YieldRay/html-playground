@@ -12,7 +12,7 @@ interface ConsolePanelProps {
 
 export function ConsolePanel({ messages, onCommand }: ConsolePanelProps) {
   const consoleContainerRef = useRef<HTMLDivElement>(null);
-  const isDarkTheme = useIsDarkTheme()
+  const isDarkTheme = useIsDarkTheme();
 
   // Auto-scroll console to bottom when new messages arrive
   useEffect(() => {
@@ -29,7 +29,8 @@ export function ConsolePanel({ messages, onCommand }: ConsolePanelProps) {
           logs={messages as any[]}
           variant={isDarkTheme ? "dark" : undefined}
           styles={{
-            fontFamily: "monospace",
+            fontFamily:
+              'ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", "Ubuntu Mono", "Fira Mono", "Droid Sans Mono", "Source Code Pro", monospace',
           }}
         />
       </div>

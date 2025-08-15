@@ -12,9 +12,9 @@ import {
   BugPlayIcon,
   ExternalLinkIcon,
   LoaderIcon,
-  EraserIcon
+  EraserIcon,
 } from "lucide-react";
-import { tinykeys } from "tinykeys"
+import { tinykeys } from "tinykeys";
 
 import { Button } from "@/components/ui/button";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -37,7 +37,7 @@ type Message = ReturnType<typeof Decode>;
 export function App({ initialHTML = "" }: { initialHTML?: string }) {
   // State management
   const [htmlCode, setHtmlCode, encodedHash] = useEncodedState(initialHTML);
-  const rewrittenCode = useMemo(() => rewriteHTML(htmlCode), [htmlCode]);
+  const rewrittenCode = useMemo(() => rewriteHTML(htmlCode, true), [htmlCode]);
   const [consoleMessages, setConsoleMessages] = useState<Message[]>([]);
   const [showConsole, setShowConsole] = useState(true);
   const [erudaLoading, setErudaLoading] = useState(false);
@@ -84,7 +84,10 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   };
 
   // Action handlers
-  const downloadCode = () => downloadFile("index.html", rewrittenCode, "text/html");
+  const downloadCode = () => {
+    const rewrittenCode = rewriteHTML(htmlCode, false);
+    downloadFile("index.html", rewrittenCode, "text/html");
+  };
 
   const open = () => {
     window.open(`${window.location.origin}${window.location.pathname}#~${encodedHash}`, "_blank");
@@ -114,7 +117,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
     if (formattedCode !== htmlCode) {
       setHtmlCode(formattedCode);
     }
-  }, [htmlCode])
+  }, [htmlCode]);
 
   // Effects
   // Listen for console messages from iframe
@@ -150,8 +153,8 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
 
   useEffect(() => {
     return tinykeys(window, {
-      "Alt+Shift+F": format
-    })
+      "Alt+Shift+F": format,
+    });
   }, [format]);
 
   const headerPart = (
