@@ -181,4 +181,8 @@ button {
       }
     }
   }
+
+  .css-15vzj7o * {
+    font-family: inherit !important;
+  }
 }

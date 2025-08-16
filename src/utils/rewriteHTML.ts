@@ -2,14 +2,14 @@ import { getFullHTMLFromDoc } from "./formatHTML";
 import { rewriteBareImport } from "./rewriteTS";
 import { CDN_ORIGIN } from "./constants";
 
-export function rewriteHTML(html: string, dev?: boolean) {
+export function rewriteHTML(html: string, dev = false) {
   const domParser = new DOMParser();
   const doc = domParser.parseFromString(html, "text/html");
 
   for (const script of doc.querySelectorAll("script")) {
     if (script.innerHTML) {
       const jsCode = script.innerHTML;
-      const rewrittenCode = rewriteBareImport(jsCode);
+      const rewrittenCode = rewriteBareImport(jsCode, dev);
       script.innerHTML = rewrittenCode;
     }
   }

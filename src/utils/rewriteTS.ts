@@ -21,11 +21,13 @@ function isBareSpecifier(specifier: string) {
 /**
  * Create a transformer to rewrite bare imports to ESM CDN
  */
-function createRewriteBareImportTransformer(ESM_CDN: string): ts.TransformerFactory<ts.SourceFile> {
+function createRewriteBareImportTransformer(ESM_CDN: string, dev = false): ts.TransformerFactory<ts.SourceFile> {
   function rewriteSpecifier(specifier: string): string {
     if (specifier.startsWith("npm:")) return specifier.replace(/^npm:/, ESM_CDN + "/");
     if (isBareSpecifier(specifier)) {
-      return new URL(specifier, ESM_CDN).toString();
+      const url = new URL(specifier, ESM_CDN);
+      if (dev) url.searchParams.set("dev", "");
+      return url.toString();
     }
     return specifier;
   }
@@ -274,7 +276,7 @@ function removeExportsTransformer(context: ts.TransformationContext): ts.Transfo
   };
 }
 
-export function rewriteBareImport(code: string): string {
+export function rewriteBareImport(code: string, dev = false): string {
   try {
     // Parse code to AST
     let sourceFile: ts.SourceFile = createSourceFile(code);
@@ -285,7 +287,7 @@ export function rewriteBareImport(code: string): string {
     }
 
     // Transform
-    const transformers: ts.TransformerFactory<ts.SourceFile>[] = [createRewriteBareImportTransformer(CDN_ORIGIN)];
+    const transformers: ts.TransformerFactory<ts.SourceFile>[] = [createRewriteBareImportTransformer(CDN_ORIGIN, dev)];
     const result: ts.TransformationResult<ts.SourceFile> = ts.transform(sourceFile, transformers);
     const sourceFile2 = result.transformed[0];
     result.dispose();
