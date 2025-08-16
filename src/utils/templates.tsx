@@ -9,7 +9,14 @@ export interface Template {
 export const HTML_TEMPLATES: Template[] = [
   {
     name: "Basic HTML",
-    description: <>Source code of <a href="https://example.net">example.net</a></>,
+    description: (
+      <>
+        Source code of{" "}
+        <a style={{ textDecoration: "underline" }} href="https://example.net">
+          example.net
+        </a>
+      </>
+    ),
     code: `<!DOCTYPE html>
 <html>
 <head>
@@ -55,11 +62,18 @@ export const HTML_TEMPLATES: Template[] = [
     <p><a href="https://www.iana.org/domains/example">More information...</a></p>
 </div>
 </body>
-</html>`
+</html>`,
   },
   {
     name: "React RadixUI",
-    description: "React19 with RadixUI",
+    description: (
+      <>
+        React19 with{" "}
+        <a style={{ textDecoration: "underline" }} href="https://www.radix-ui.com">
+          Radix UI
+        </a>
+      </>
+    ),
     code: `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -100,11 +114,18 @@ export const HTML_TEMPLATES: Template[] = [
     const root = createRoot(document.getElementById("root"));
     root.render(<App />);
   </script>
-</html>`
+</html>`,
   },
   {
     name: "Vue NaiveUI",
-    description: "Vue3 with NaiveUI",
+    description: (
+      <>
+        Vue3 with{" "}
+        <a style={{ textDecoration: "underline" }} href="https://naiveui.com">
+          Naive UI
+        </a>
+      </>
+    ),
     code: `<!DOCTYPE html>
 <html lang="en"><head>
     <meta charset="UTF-8">
@@ -119,9 +140,6 @@ import { NButton, NResult } from 'naive-ui'
 const React = { createElement: h }
 
 const Demo = defineComponent({
-  components: {
-    NButton
-  },
   setup() {
     const code = ref(418)
     return () => (
@@ -142,12 +160,20 @@ createApp(Demo).mount('#app')
   },
   {
     name: "React FlappyBird",
-    description: <>Port of <a href="https://v0.app/community/flappy-bird-H6d9DNE50jO">FlappyBird</a></>,
+    description: (
+      <>
+        Port of{" "}
+        <a style={{ textDecoration: "underline" }} href="https://v0.app/community/flappy-bird-H6d9DNE50jO">
+          FlappyBird
+        </a>
+      </>
+    ),
     code: `<!DOCTYPE html>
 <html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FlappyBird</title>
+    <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body>
     <div id="root"></div>
@@ -483,6 +509,28 @@ const root = createRoot(document.getElementById("root"));
 root.render(<FlappyBird />);
 </script>
 
-</body></html>`
-  }
+</body></html>`,
+  },
 ];
+
+/**
+ * Return html starts with <script> after <head> and slice 150 characters
+ */
+export function getSnapshotCode(code: string): string {
+  const headEndMatch = code.match(/<\/head>/i);
+
+  if (!headEndMatch) {
+    return code.slice(0, 150);
+  }
+
+  const afterHead = code.slice(headEndMatch.index! + headEndMatch[0].length);
+  const scriptMatch = afterHead.match(/<script[^>]*>/i);
+
+  if (!scriptMatch) {
+    return code.slice(0, 150);
+  }
+
+  const scriptStart = headEndMatch.index! + headEndMatch[0].length + scriptMatch.index!;
+
+  return code.slice(scriptStart, scriptStart + 150);
+}

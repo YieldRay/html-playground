@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { HTML_TEMPLATES, type Template } from "@/utils/templates";
+import { getSnapshotCode, HTML_TEMPLATES, type Template } from "@/utils/templates";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -35,14 +35,12 @@ export function TemplatePicker({ onSelectTemplate }: TemplatePickerProps) {
           <PlusIcon className="h-3.5 w-3.5" />
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-hidden">
+      <DialogContent className="sm:max-w-4xl max-w-2xl max-h-[80vh] overflow-hidden">
         <DialogHeader>
           <DialogTitle>Choose a Template</DialogTitle>
-          <DialogDescription>
-            Select a template to get started quickly with your HTML project.
-          </DialogDescription>
+          <DialogDescription>Select a template to get started quickly with your HTML project.</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 py-4 overflow-y-auto max-h-[60vh]">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 py-4 overflow-y-auto max-h-[60vh]">
           {HTML_TEMPLATES.map((template, index) => (
             <div
               key={index}
@@ -50,13 +48,9 @@ export function TemplatePicker({ onSelectTemplate }: TemplatePickerProps) {
               onClick={() => handleSelectTemplate(template)}
             >
               <h3 className="font-semibold text-lg mb-2">{template.name}</h3>
-              <p className="text-muted-foreground text-sm mb-3">
-                {template.description}
-              </p>
+              <p className="text-muted-foreground text-sm mb-3">{template.description}</p>
               <div className="bg-muted rounded p-2 text-xs font-mono overflow-hidden">
-                <div className="line-clamp-3">
-                  {template.code.substring(0, 150)}...
-                </div>
+                <div className="line-clamp-3">{getSnapshotCode(template.code)}...</div>
               </div>
             </div>
           ))}
