@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { useIsDarkTheme } from "@/components/theme-provider";
 import type { PrismEditor } from "prism-code-editor";
 import type { EditorTheme } from "prism-code-editor/themes";
@@ -9,17 +9,18 @@ import "prism-code-editor/prism/languages/markup";
 import "prism-code-editor/prism/languages/jsx";
 import "prism-code-editor/prism/languages/css-extras";
 
-export function Editor({
-  value = "",
-  language = "html",
-  onUpdate,
-  onLoad,
-  className,
-}: Partial<SetupOptions> & {
-  onLoad?: VoidFunction;
-  className?: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
+export interface EditorRef {
+  setValue: (value: string) => void;
+}
+
+export const Editor = forwardRef<
+  EditorRef,
+  Partial<SetupOptions> & {
+    initValue?: string;
+    onLoad?: VoidFunction;
+  } & React.HTMLAttributes<HTMLDivElement>
+>(({ initValue = "", language = "html", onUpdate, onLoad, ...props }, forwardedRef) => {
+  const divRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<
     PrismEditor<{
       theme: EditorTheme;
@@ -28,13 +29,26 @@ export function Editor({
   const isDarkTheme = useIsDarkTheme();
   const theme = isDarkTheme ? "github-dark" : "github-light";
 
+  useImperativeHandle(
+    forwardedRef,
+    () => ({
+      setValue: (value: string) => {
+        const editor = editorRef.current;
+        if (editor) {
+          editor.setOptions({ value });
+        }
+      },
+    }),
+    []
+  );
+
   useEffect(() => {
-    const div = ref.current;
+    const div = divRef.current;
     if (!div) return;
     const editor = basicEditor(
       div,
       {
-        value,
+        value: initValue,
         language,
         theme,
         onUpdate,
@@ -51,18 +65,10 @@ export function Editor({
     if (!editor) return;
 
     editor.setOptions({
-      value,
-    });
-  }, [value]);
-
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-
-    editor.setOptions({
       theme,
+      language,
     });
-  }, [theme]);
+  }, [theme, language]);
 
-  return <div ref={ref} className={className}></div>;
-}
+  return <div ref={divRef} {...props}></div>;
+});

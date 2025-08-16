@@ -25,7 +25,7 @@ import { rewriteHTML, rewriteScript } from "./utils/rewriteHTML";
 import { formatHTML } from "./utils/formatHTML";
 import { downloadFile, debounce } from "./utils/utils";
 import { useEncodedState } from "./hooks/useEncodedState";
-import { Editor } from "./Editor";
+import { Editor, type EditorRef } from "./Editor";
 import { Sheet } from "./Sheet";
 import { ConsolePanel } from "./ConsolePanel";
 import { ShareModal } from "./ShareModal";
@@ -34,6 +34,12 @@ import { useWindowSizeType } from "./hooks/useMediaQuery";
 
 type Message = ReturnType<typeof Decode>;
 
+/**
+ *     App: htmlCode  setHTMLCodeAndSyncToEditor
+ *            ^           |
+ *            |           v
+ *   Editor: onUpdate $value$
+ */
 export function App({ initialHTML = "" }: { initialHTML?: string }) {
   // State management
   const [htmlCode, setHtmlCode, encodedHash] = useEncodedState(initialHTML);
@@ -46,9 +52,16 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
 
   // Refs
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const editorRef = useRef<EditorRef>(null);
 
-  // Memoized values and callbacks
-  const debouncedSetHtmlCode = useMemo(() => debounce((value: string) => setHtmlCode(value), 500), [setHtmlCode]);
+  // Utility function to update both state and editor
+  const setHTMLCodeAndSyncToEditor = useCallback(
+    (code: string) => {
+      setHtmlCode(code);
+      editorRef.current?.setValue(code);
+    },
+    [setHtmlCode]
+  );
 
   // Utility functions
   const clearConsole = () => setConsoleMessages([]);
@@ -115,9 +128,9 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const format = useCallback(() => {
     const formattedCode = formatHTML(htmlCode);
     if (formattedCode !== htmlCode) {
-      setHtmlCode(formattedCode);
+      setHTMLCodeAndSyncToEditor(formattedCode);
     }
-  }, [htmlCode]);
+  }, [htmlCode, setHTMLCodeAndSyncToEditor]);
 
   // Effects
   // Listen for console messages from iframe
@@ -160,7 +173,7 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   const headerPart = (
     <header className="flex items-center justify-between border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-2 py-1 min-h-[32px]">
       <div className="flex items-center gap-1.5">
-        <TemplatePicker onSelectTemplate={setHtmlCode} />
+        <TemplatePicker onSelectTemplate={setHTMLCodeAndSyncToEditor} />
         <Separator orientation="vertical" />
         <h1 className="text-sm font-semibold text-foreground/90">HTML Playground</h1>
       </div>
@@ -251,7 +264,14 @@ export function App({ initialHTML = "" }: { initialHTML?: string }) {
   );
 
   const editorPart = (
-    <Editor value={htmlCode} onUpdate={debouncedSetHtmlCode} className="grid w-full h-full overflow-auto" />
+    <Editor
+      ref={editorRef}
+      language="html"
+      initValue={htmlCode}
+      // Sync the code back to App state when edit the code
+      onUpdate={debounce((value: string) => setHtmlCode(value), 500)}
+      className="grid w-full h-full overflow-auto"
+    />
   );
 
   const previewPart = <iframe ref={iframeRef} className="w-full h-full" title="Preview" />;
